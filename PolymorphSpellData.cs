@@ -16,4 +16,10 @@ internal class PolymorphSpellData : SpellData
     #if DEBUG
         public override bool DebugForceSpawn => true;
     #endif
+    
+    internal static AssetBundle PolymorphAssets;
+
+    internal static AudioClip PolymorphCastSound;
+
+    internal static AudioClip PolymorphSubsideSound;
 }

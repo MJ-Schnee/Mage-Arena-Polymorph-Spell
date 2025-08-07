@@ -11,15 +11,15 @@ internal static class PolymorphSpellConfig
 
     internal static ConfigEntry<float> RangeConfig { get; private set; }
 
-    internal static ConfigEntry<float> DamageConfig { get; private set; }
+    internal static ConfigEntry<float> DefaultSpellDurationSecConfig { get; private set; }
 
-    internal static ConfigEntry<float> ChanceConfig { get; private set; }
+    internal static ConfigEntry<float> CastingLevelDurationIncreaseSecConfig { get; private set; }
 
     internal static ConfigEntry<bool> TeamChestConfig { get; private set; }
 
-    private static bool mageConfigApiExists;
+    private static bool _mageConfigApiExists;
 
-    private static BaseUnityPlugin plugin;
+    private static BaseUnityPlugin _plugin;
 
     /// <summary>
     /// Loads all configuration options
@@ -27,8 +27,8 @@ internal static class PolymorphSpellConfig
     /// <param name="plugin">Plugin to attach</param>
     public static void LoadConfig(BaseUnityPlugin plugin)
     {
-        PolymorphSpellConfig.plugin = plugin;
-        mageConfigApiExists = Chainloader.PluginInfos.ContainsKey("com.d1gq.mage.configuration.api");
+        _plugin = plugin;
+        _mageConfigApiExists = Chainloader.PluginInfos.ContainsKey("com.d1gq.mage.configuration.api");
 
         CooldownConfig = BindConfig(
             "Cooldown",
@@ -41,6 +41,20 @@ internal static class PolymorphSpellConfig
             "Range",
             20f,
             "Maximum distance a target can be from the caster (> 0)",
+            new AcceptableValueRange<float>(0f, float.MaxValue)
+        );
+
+        DefaultSpellDurationSecConfig = BindConfig(
+            "DefaultSpellDuration",
+            5f,
+            "Duration in seconds target will be polymorphed for (> 0)",
+            new AcceptableValueRange<float>(0f, float.MaxValue)
+        );
+
+        CastingLevelDurationIncreaseSecConfig = BindConfig(
+            "CastingLevelDurationIncrease",
+            1f,
+            "Duration in seconds polymorph will extend per spell level for (> 0)",
             new AcceptableValueRange<float>(0f, float.MaxValue)
         );
 
@@ -62,16 +76,16 @@ internal static class PolymorphSpellConfig
     /// <returns></returns>
     private static ConfigEntry<T> BindConfig<T>(string key, T defaultValue, string description, AcceptableValueBase acceptableValues = null)
     {
-        ConfigEntry<T> configEntry = plugin.Config.Bind(
+        ConfigEntry<T> configEntry = _plugin.Config.Bind(
             PluginInfo.PLUGIN_NAME,
             key,
             defaultValue,
             new ConfigDescription(description, acceptableValues)
         );
 
-        if (mageConfigApiExists)
+        if (_mageConfigApiExists)
         {
-            new ModConfig(plugin, configEntry, MageConfigurationAPI.Enums.SettingsFlag.ShowInLobbyMenu);
+            new ModConfig(_plugin, configEntry, MageConfigurationAPI.Enums.SettingsFlag.ShowInLobbyMenu);
         }
 
         return configEntry;
