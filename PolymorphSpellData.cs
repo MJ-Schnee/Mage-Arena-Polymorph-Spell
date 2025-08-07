@@ -1,4 +1,5 @@
-﻿using BlackMagicAPI.Modules.Spells;
+﻿using System.IO;
+using BlackMagicAPI.Modules.Spells;
 using UnityEngine;
 
 namespace PolymorphSpell;
@@ -16,10 +17,33 @@ internal class PolymorphSpellData : SpellData
     #if DEBUG
         public override bool DebugForceSpawn => true;
     #endif
-    
-    internal static AssetBundle PolymorphAssets;
+
+    internal static GameObject ChickenPrefab;
 
     internal static AudioClip PolymorphCastSound;
 
     internal static AudioClip PolymorphSubsideSound;
+
+    internal static void LoadAssets()
+    {
+        var polymorphAssetsPath = Path.Combine(Utils.PluginDir, "AssetBundles", "polymorph");
+        var polymorphAssets = BlackMagicAPI.Helpers.Utils.LoadAssetBundleFromDisk(polymorphAssetsPath);
+        if (polymorphAssets is null)
+        {
+            PolymorphSpell.Logger.LogError("Polymorph assets not found");
+            return;
+        }
+
+        foreach (var asset in polymorphAssets.GetAllAssetNames())
+        {
+            PolymorphSpell.Logger.LogInfo($"ASSET NAME: {asset}");
+        }
+
+        ChickenPrefab = polymorphAssets.LoadAsset<GameObject>("assets/polymorphspell/chicken.prefab");
+        Object.DontDestroyOnLoad(ChickenPrefab);
+
+        PolymorphCastSound = Utils.LoadSound("Polymorph_Cast.wav", AudioType.WAV);
+
+        PolymorphSubsideSound = Utils.LoadSound("Polymorph_Subside.wav", AudioType.WAV);
+    }
 }

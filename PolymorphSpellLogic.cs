@@ -18,6 +18,8 @@ internal class PolymorphSpellLogic : SpellLogic
     private static void StartPolymorph(GameObject victim)
     {
         Utils.PlaySpatialSoundAtPosition(victim.transform.position, PolymorphSpellData.PolymorphCastSound);
+        var chickenGameObject = 
+            Instantiate(PolymorphSpellData.ChickenPrefab, victim.transform.position, Quaternion.identity);
     }
 
     private static IEnumerator EndPolymorph(GameObject victim, float spellDurationSec)

@@ -1,11 +1,8 @@
 ﻿using BepInEx;
 using BepInEx.Logging;
-using BlackMagicAPI.Helpers;
 using BlackMagicAPI.Managers;
-using HarmonyLib;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using UnityEngine;
 
 namespace PolymorphSpell;
@@ -31,12 +28,7 @@ public class PolymorphSpell : BaseUnityPlugin
 
         PolymorphSpellConfig.LoadConfig(this);
 
-        PolymorphSpellData.PolymorphAssets = Assembly.GetCallingAssembly()
-            .LoadAssetBundleFromResources("PolymorphSpell.AssetBundles.Polymorph");
-
-        PolymorphSpellData.PolymorphCastSound = Utils.LoadSound("Polymorph_Cast.wav", AudioType.WAV);
-
-        PolymorphSpellData.PolymorphSubsideSound = Utils.LoadSound("Polymorph_Subside.wav", AudioType.WAV);
+        PolymorphSpellData.LoadAssets();
 
         BlackMagicManager.RegisterSpell(this, typeof(PolymorphSpellData), typeof(PolymorphSpellLogic));
 
