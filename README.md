@@ -1,5 +1,8 @@
-﻿# Wager Spell
-A spell spell which turns other mages into animals.
+﻿# Polymorph Spell
+*Erm, technically this spell requires a caterpillar cocoon* ☝️🤓
+
+A spell spell which turns other mages into animals,
+rendering them unable to communicate or use spells until the effect wares off or they die.
 
 ## Spell Information
 * **Name**: "Polymorph"
