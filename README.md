@@ -2,7 +2,11 @@
 A spell spell which turns other mages into animals.
 
 ## Spell Information
-TBA
+* **Name**: "Polymorph"
+* **Cooldown**: 60 seconds
+* **Range**: 20 meters maximum
+* **Cone of Vision**: 45°
+* **Team Chest**: Can spawn in team chest
 
 ## Installation
 
@@ -34,10 +38,12 @@ Edit `BepInEx/config/com.YeahThatsMJ.PolymorphSpell.cfg` to adjust settings.
 Compatible with [MageConfigurationAPI by D1GQ](https://thunderstore.io/c/mage-arena/p/D1GQ/MageConfigurationAPI/)!
 
 The following settings can be adjusted:
-TBA
+* Cooldown
+* Range
+* Team chest spawning
 
 ## Changelog
-TBA
+* **0.1.0**: Add spell page with visuals and pickup/drop sounds
 
 ## Credits
 * **Polymorph Icon**: "Baldurs Gate 3" by Larian Studios - https://bg3.wiki/wiki/Polymorph

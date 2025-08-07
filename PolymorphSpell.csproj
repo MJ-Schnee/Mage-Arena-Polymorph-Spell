@@ -1,10 +1,10 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net48</TargetFramework>
     <AssemblyName>PolymorphSpell</AssemblyName>
     <Product>Turn other mages into animals!</Product>
-    <Version>0.0.0</Version>
+    <Version>0.1.0</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>latest</LangVersion>
     <RestoreAdditionalProjectSources>
@@ -24,6 +24,39 @@
   
   <ItemGroup Condition="'$(TargetFramework.TrimEnd(`0123456789`))' == 'net'">
     <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.2" PrivateAssets="all" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Reference Include="0Harmony">
+      <HintPath>..\..\..\AppData\Roaming\com.kesomannen.gale\mage-arena\profiles\Dev\BepInEx\core\0Harmony.dll</HintPath>
+    </Reference>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Mage Arena\MageArena_Data\Managed\Assembly-CSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="BepInEx">
+      <HintPath>..\..\..\AppData\Roaming\com.kesomannen.gale\mage-arena\profiles\Dev\BepInEx\core\BepInEx.dll</HintPath>
+    </Reference>
+    <Reference Include="BlackMagicAPI">
+      <HintPath>..\..\..\AppData\Roaming\com.kesomannen.gale\mage-arena\profiles\Dev\BepInEx\plugins\D1GQ-BlackMagicAPI\BlackMagicAPI\BlackMagicAPI.dll</HintPath>
+    </Reference>
+    <Reference Include="FishNet.Runtime">
+      <HintPath>..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Mage Arena\MageArena_Data\Managed\FishNet.Runtime.dll</HintPath>
+    </Reference>
+    <Reference Include="MageConfigurationAPI">
+      <HintPath>..\..\..\AppData\Roaming\com.kesomannen.gale\mage-arena\profiles\Dev\BepInEx\plugins\D1GQ-MageConfigurationAPI\MageConfigurationAPI.dll</HintPath>
+    </Reference>
+    <Reference Include="ModSync">
+      <HintPath>..\..\..\AppData\Roaming\com.kesomannen.gale\mage-arena\profiles\Dev\BepInEx\plugins\hiccup-ModSync\ModSync.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine">
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Mage Arena\MageArena_Data\Managed\UnityEngine.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.AssetBundleModule">
+      <HintPath>..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Mage Arena\MageArena_Data\Managed\UnityEngine.AssetBundleModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Mage Arena\MageArena_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+    </Reference>
   </ItemGroup>
   
   <ItemGroup>
