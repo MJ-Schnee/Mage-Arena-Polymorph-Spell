@@ -1,5 +1,5 @@
 ﻿# Wager Spell
-TBA
+A spell spell which turns other mages into animals.
 
 ## Spell Information
 TBA
@@ -20,6 +20,13 @@ TBA
        └── plugins/
            └── PolymorphSpell/
 			   └── PolymorphSpell.dll
+			   └── Sounds/
+			       └── Polymorph_Drop.wav
+			       └── Polymorph_Equip.wav
+			   └── Sprites/
+			       └── Polymorph_Emission.png
+			       └── Polymorph_Main.png
+			       └── Polymorph_Ui.png
    ```
 ## Configuration
 Edit `BepInEx/config/com.YeahThatsMJ.PolymorphSpell.cfg` to adjust settings.
@@ -31,3 +38,6 @@ TBA
 
 ## Changelog
 TBA
+
+## Credits
+* **Polymorph Icon**: "Baldurs Gate 3" by Larian Studios - https://bg3.wiki/wiki/Polymorph
