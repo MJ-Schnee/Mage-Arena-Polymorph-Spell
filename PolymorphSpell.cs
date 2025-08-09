@@ -48,7 +48,8 @@ public class PolymorphSpell : BaseUnityPlugin
                     return;
                 }
 
-                foreach (var player in players)
+                foreach (var player in players.Where(player =>
+                             player.GetComponent<NetworkObject>()?.HasAuthority == true))
                 {
                     var spawnPos = player.transform.position + player.transform.forward;
                     spawnPos.y += 1.5f;
