@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 using BlackMagicAPI.Modules.Spells;
 using UnityEngine;
 
@@ -29,6 +30,8 @@ internal class PolymorphSpellData : SpellData
     internal static AudioClip PolymorphSubsideSound;
 
     internal const float MaxFindTargetAngle = 45f;
+
+    internal static readonly HashSet<int> PolymorphedPlayers = [];
 
     internal static void LoadAssets()
     {

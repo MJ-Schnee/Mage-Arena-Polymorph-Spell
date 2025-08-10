@@ -49,6 +49,8 @@ The following settings can be adjusted:
 * Duration increase per spell level
 
 ## Changelog
+* **0.4.1**: Can't target already polymorphed players
+
 * **0.4.0**: Add chicken sounds
 
 * **0.3.1**: Fix polymorph ending immediately

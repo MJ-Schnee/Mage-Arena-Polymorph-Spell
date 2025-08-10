@@ -52,6 +52,7 @@ internal class PolymorphSpellLogic : SpellLogic
         GameObject targetPlayer = null;
         PlayerMovement targetPlayerMovement = null;
         var targetPlayerIsClient = false;
+        var targetPlayerNetId = 0;
         
         var casterMovementComp = caster.GetComponent<PlayerMovement>();
         if (casterMovementComp is null)
@@ -70,6 +71,10 @@ internal class PolymorphSpellLogic : SpellLogic
             // Skip self
             var targetNetObj = target.GetComponent<NetworkObject>();
             if (targetNetObj is null || targetNetObj.ObjectId == casterNetId)
+                continue;
+            
+            // Skip already polymorphed players
+            if (PolymorphSpellData.PolymorphedPlayers.Contains(targetNetObj.ObjectId))
                 continue;
 
             var tempTargetMovement = target.GetComponent<PlayerMovement>();
@@ -96,7 +101,10 @@ internal class PolymorphSpellLogic : SpellLogic
             targetPlayer = tempTargetMovement.gameObject;
             targetPlayerMovement = tempTargetMovement;
             targetPlayerIsClient = targetNetObj.IsOwner;
+            targetPlayerNetId = targetNetObj.ObjectId;
         }
+        
+        PolymorphSpellData.PolymorphedPlayers.Add(targetPlayerNetId);
 
         return (targetPlayer, targetPlayerMovement, targetPlayerIsClient);
     }
@@ -205,6 +213,14 @@ internal class PolymorphSpellLogic : SpellLogic
         
         // Destroy polymorph
         Destroy(polymorph);
+
+        var victimNetObj = victim.GetComponent<NetworkObject>();
+        if (victimNetObj is null)
+        {
+            PolymorphSpell.Logger.LogInfo("Victim Network Object is null!");
+            yield break;
+        }
+        PolymorphSpellData.PolymorphedPlayers.Remove(victimNetObj.ObjectId);
 
         // Re-enable player's skins (player could have died while waiting for sound to finish)
         if (!victimPlayerMovement.isDead)
