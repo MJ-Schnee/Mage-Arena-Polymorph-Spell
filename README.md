@@ -49,6 +49,8 @@ The following settings can be adjusted:
 * Duration increase per spell level
 
 ## Changelog
+* **0.4.0**: Add chicken sounds
+
 * **0.3.1**: Fix polymorph ending immediately
 
 * **0.3.0**: Add controllable polymorph
@@ -62,3 +64,4 @@ The following settings can be adjusted:
 * **Casting sound**: "Magic spell (small positive)" by Nakhas - https://freesound.org/people/Nakhas/sounds/506939/
 * **Polymorph models**: "Animals FREE - Animated Low Poly 3D Models" by ithappy - https://assetstore.unity.com/packages/3d/characters/animals/animals-free-animated-low-poly-3d-models-260727
 * **Star explosion effect**: "Magic Effects FREE" by Hovl Studio - https://assetstore.unity.com/packages/vfx/particles/spells/magic-effects-free-247933
+* **Chicken clucking**: "chicken clucking type 3" by RibhavAgrawal - https://pixabay.com/sound-effects/chicken-cluking-type-3-293320/

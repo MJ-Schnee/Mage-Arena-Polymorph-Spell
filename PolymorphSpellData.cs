@@ -20,6 +20,8 @@ internal class PolymorphSpellData : SpellData
 
     internal static GameObject ChickenPrefab;
 
+    internal static AudioClip ChickenSounds;
+
     internal static GameObject StarExplosionPrefab;
 
     internal static AudioClip PolymorphCastSound;
@@ -47,6 +49,8 @@ internal class PolymorphSpellData : SpellData
 
         ChickenPrefab = polymorphAssets.LoadAsset<GameObject>("assets/polymorphspell/chicken.prefab");
         Object.DontDestroyOnLoad(ChickenPrefab);
+
+        ChickenSounds = Utils.LoadSound("Chicken.wav", AudioType.WAV);
 
         StarExplosionPrefab =
             polymorphAssets.LoadAsset<GameObject>(

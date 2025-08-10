@@ -129,6 +129,17 @@ internal class PolymorphSpellLogic : SpellLogic
         polymorph.transform.localPosition = Vector3.zero;
         polymorph.transform.localRotation = Quaternion.identity;
         
+        // Spawn chicken sounds and attach to victim
+        var polymorphSoundLoop = polymorph.AddComponent<AudioSource>();
+        polymorphSoundLoop.clip = PolymorphSpellData.ChickenSounds;
+        polymorphSoundLoop.volume = 1f;
+        polymorphSoundLoop.spatialBlend = 1f;
+        polymorphSoundLoop.rolloffMode = AudioRolloffMode.Linear;
+        polymorphSoundLoop.minDistance = 5f;
+        polymorphSoundLoop.maxDistance = 350f;
+        polymorphSoundLoop.loop = true;
+        polymorphSoundLoop.Play();
+        
         // Spawn star explosion effects
         var starExplosionEffect = Instantiate(PolymorphSpellData.StarExplosionPrefab, victim.transform.position,
             Quaternion.identity);
