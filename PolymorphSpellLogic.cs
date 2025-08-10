@@ -44,6 +44,11 @@ internal class PolymorphSpellLogic : SpellLogic
         StartPolymorph(victim, spellDurationSec);
     }
 
+    /// <summary>
+    /// Begin polymorph effect on victim
+    /// </summary>
+    /// <param name="victim"></param>
+    /// <param name="spellDurationSec"></param>
     private void StartPolymorph(GameObject victim, float spellDurationSec)
     {
         var victimPlayerMovement = victim.GetComponent<PlayerMovement>();
@@ -76,12 +81,21 @@ internal class PolymorphSpellLogic : SpellLogic
             }
             PolymorphController.ClientPolymorphAnimator = polymorphAnimator;
         }
-        
-        // TODO: EndPolymorph on player death
-        StartCoroutine(EndPolymorph(victim, spellDurationSec, polymorph, playerSkins));
+
+        var spellStartTime = Time.time;
+        StartCoroutine(EndPolymorph(victim, spellStartTime, spellDurationSec, polymorph, playerSkins));
     }
 
-    private static IEnumerator EndPolymorph(GameObject victim,
+    /// <summary>
+    /// Waits for player to die or polymorph timer to finish and then removes polymorph effect
+    /// </summary>
+    /// <param name="victim">Victim affected by polymorph</param>
+    /// <param name="spellStartTime">Time when polymorph spell started</param>
+    /// <param name="spellDurationSec">Duration of polymorph</param>
+    /// <param name="polymorph">Polymorph object</param>
+    /// <param name="playerSkins">Disabled skins of victim</param>
+    private IEnumerator EndPolymorph(GameObject victim,
+        float spellStartTime,
         float spellDurationSec,
         GameObject polymorph,
         SkinnedMeshRenderer[] playerSkins)
@@ -90,23 +104,34 @@ internal class PolymorphSpellLogic : SpellLogic
         
         var soundLength = PolymorphSpellData.PolymorphSubsideSound.length;
         
-        yield return new WaitForSeconds(spellDurationSec - soundLength);
-        
-        Utils.PlaySpatialSoundAtPosition(victim.transform.position, PolymorphSpellData.PolymorphSubsideSound);
+        // Wait until player is dead or polymorph timer has finished
+        while (!victimPlayerMovement.isDead)
+        {
+            if (Time.time < spellStartTime + spellDurationSec - soundLength)
+            {
+                yield return null;
+            }
+            
+            Utils.PlaySpatialSoundAtPosition(victim.transform.position, PolymorphSpellData.PolymorphSubsideSound);
 
-        yield return new WaitForSeconds(soundLength);
+            yield return new WaitForSeconds(soundLength);
+            break;
+        }
         
         // Destroy polymorph
         Destroy(polymorph);
 
-        // Re-enable player's skins
-        var arms = victim.transform.Find("armz");
-        var pickup = victim.transform.Find("pikupact");
-        arms?.gameObject.SetActive(true);
-        pickup?.gameObject.SetActive(true);
-        foreach (var meshRenderer in playerSkins)
+        // Re-enable player's skins (player could have died while waiting for sound to finish)
+        if (!victimPlayerMovement.isDead)
         {
-            meshRenderer.enabled = true;
+            var arms = victim.transform.Find("armz");
+            var pickup = victim.transform.Find("pikupact");
+            arms?.gameObject.SetActive(true);
+            pickup?.gameObject.SetActive(true);
+            foreach (var meshRenderer in playerSkins)
+            {
+                meshRenderer.enabled = true;
+            }   
         }
         
         // Return camera to default if client
