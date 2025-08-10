@@ -1,11 +1,11 @@
 {
     "name": "PolymorphSpell",
-    "version_number": "0.2.0",
+    "version_number": "0.3.0",
     "website_url": "https://github.com/MJ-Schnee/Mage-Arena-Polymorph-Spell",
     "description": "A spell spell which turns other mages into animals.",
     "dependencies": [
         "BepInEx-BepInExPack-5.4.2100",
-        "D1GQ-BlackMagicAPI-2.2.0",
-        "hiccup-ModSync-1.0.5"
+        "D1GQ-BlackMagicAPI-2.3.1",
+        "hiccup-ModSync-1.0.6"
     ]
 }
