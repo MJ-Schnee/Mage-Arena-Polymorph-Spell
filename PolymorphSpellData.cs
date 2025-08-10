@@ -24,6 +24,8 @@ internal class PolymorphSpellData : SpellData
 
     internal static AudioClip PolymorphSubsideSound;
 
+    internal const float MaxFindTargetAngle = 45f;
+
     internal static void LoadAssets()
     {
         var polymorphAssetsPath = Path.Combine(Utils.PluginDir, "AssetBundles", "polymorph");

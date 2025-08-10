@@ -17,31 +17,88 @@ internal class PolymorphSpellLogic : SpellLogic
         var spellDurationSec = PolymorphSpellConfig.DefaultSpellDurationSecConfig.Value +
                                  castingLevel * PolymorphSpellConfig.CastingLevelDurationIncreaseSecConfig.Value;
 
-        // TODO: Cast on other player
-        var victim = caster;
-        var victimPlayerMovement = victim.GetComponent<PlayerMovement>();
-        if (victimPlayerMovement is null)
-        {
-            PolymorphSpell.Logger.LogError("Victim PlayerMovement not found!");
-            return;
-        }
-        
-        // Take over camera controls if client is victim
-        var victimNetObj = victimPlayerMovement.GetComponent<NetworkObject>();
-        if (victimNetObj is null)
-        {
-            PolymorphSpell.Logger.LogError("Victim Network Object not found!");
-            return;
-        }
+        var (victim, victimPlayerMovement, victimIsClient) = 
+            #if DEBUG && SHOULD_POLYMORPH_SELF
+                (caster, caster.GetComponent<PlayerMovement>(), true);
+            #else
+                FindTarget(caster);
+            #endif
 
-        if (victimNetObj.IsOwner)
+        if (victimIsClient)
         {
-            PolymorphController.IsClientPolymorphed = true;
             PolymorphController.ClientPlayerMovement = victimPlayerMovement;
             victimPlayerMovement.gameObject.AddComponent<PolymorphController>();
         }
         
         StartPolymorph(victim, spellDurationSec);
+    }
+
+    /// <summary>
+    /// Finds best player to target
+    /// </summary>
+    /// <param name="caster"></param>
+    /// <returns></returns>
+    private static (GameObject victim, PlayerMovement victimPlayerMovement, bool victimIsClient)
+        FindTarget(GameObject caster)
+    {
+        var casterNetObj = caster.GetComponent<NetworkObject>();
+        if (casterNetObj is null)
+        {
+            PolymorphSpell.Logger.LogError("Spell network object couldn't be found!");
+            return (null, null, false);
+        }
+        
+        var casterNetId = casterNetObj.ObjectId;
+        GameObject targetPlayer = null;
+        PlayerMovement targetPlayerMovement = null;
+        var targetPlayerIsClient = false;
+        
+        var casterMovementComp = caster.GetComponent<PlayerMovement>();
+        if (casterMovementComp is null)
+        {
+            PolymorphSpell.Logger.LogError("Caster's PlayerMovement could not be found!");
+            return (null, null, false);
+        }
+        
+        var casterPos = caster.transform.position;
+        var forward = caster.transform.forward;
+
+        var bestScore = float.MaxValue;
+
+        foreach (var target in GameObject.FindGameObjectsWithTag("Player"))
+        {
+            // Skip self
+            var targetNetObj = target.GetComponent<NetworkObject>();
+            if (targetNetObj is null || targetNetObj.ObjectId == casterNetId)
+                continue;
+
+            var tempTargetMovement = target.GetComponent<PlayerMovement>();
+            if (tempTargetMovement is null)
+                continue;
+
+            var toTarget = target.transform.position - casterPos;
+            var dist = toTarget.magnitude;
+            if (dist > PolymorphSpellConfig.RangeConfig.Value)
+                continue;
+
+            var angle = Vector3.Angle(forward, toTarget.normalized);
+            if (angle > PolymorphSpellData.MaxFindTargetAngle)
+                continue;
+
+            if (!Utils.HasLineOfSight(casterPos, target.transform.position))
+                continue;
+
+            var score = angle * 2f + dist;
+            if (!(score < bestScore))
+                continue;
+                
+            bestScore = score;
+            targetPlayer = tempTargetMovement.gameObject;
+            targetPlayerMovement = tempTargetMovement;
+            targetPlayerIsClient = targetNetObj.IsOwner;
+        }
+
+        return (targetPlayer, targetPlayerMovement, targetPlayerIsClient);
     }
 
     /// <summary>
@@ -71,7 +128,9 @@ internal class PolymorphSpellLogic : SpellLogic
         polymorph.transform.SetParent(victim.transform, false);
         polymorph.transform.localPosition = Vector3.zero;
         polymorph.transform.localRotation = Quaternion.identity;
-        if (PolymorphController.IsClientPolymorphed)
+        
+        // Update client polymorph controller if need be
+        if (victim.TryGetComponent<PolymorphController>(out _))
         {
             var polymorphAnimator = polymorph.GetComponent<Animator>();
             if (polymorphAnimator is null)
@@ -135,17 +194,13 @@ internal class PolymorphSpellLogic : SpellLogic
         }
         
         // Return camera to default if client
-        if (!PolymorphController.IsClientPolymorphed)
-            yield break;
-        var polymorphCamController = victimPlayerMovement.gameObject.GetComponent<PolymorphController>();
-        if (polymorphCamController is null)
+        var clientWasPolymorphed =
+            victimPlayerMovement.gameObject.TryGetComponent<PolymorphController>(out var polymorphCamController); 
+        if (!clientWasPolymorphed)
         {
-            PolymorphSpell.Logger.LogError("Polymorphed Camera Controller not found!");
+            PolymorphSpell.Logger.LogInfo("Polymorphed Camera Controller not found. Assuming client isn't polymorphed");
             yield break;
         }
         Destroy(polymorphCamController);
-        PolymorphController.ClientPlayerMovement.ResetCam();
-        PolymorphController.ClientPolymorphAnimator = null;
-        PolymorphController.IsClientPolymorphed = false;
     }
 }

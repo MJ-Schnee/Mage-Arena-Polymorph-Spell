@@ -8,8 +8,6 @@ namespace PolymorphSpell;
 /// </summary>
 internal class PolymorphController: MonoBehaviour
 {
-    internal static bool IsClientPolymorphed { get; set; }
-    
     internal static PlayerMovement ClientPlayerMovement { get; set; }
     
     internal static Animator ClientPolymorphAnimator { get; set; }
@@ -44,9 +42,6 @@ internal class PolymorphController: MonoBehaviour
     
     private void Update()
     {
-        if (!IsClientPolymorphed)
-            return;
-        
         // Disable recall
         ClientPlayerMovement.canRecall = false;
         
@@ -74,6 +69,8 @@ internal class PolymorphController: MonoBehaviour
 
     private void OnDestroy()
     {
+        ClientPlayerMovement.ResetCam();
+        ClientPolymorphAnimator = null;
         ClientPlayerMovement.canRecall = true;
     }
 }
