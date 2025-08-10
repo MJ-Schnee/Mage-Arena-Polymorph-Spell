@@ -129,6 +129,12 @@ internal class PolymorphSpellLogic : SpellLogic
         polymorph.transform.localPosition = Vector3.zero;
         polymorph.transform.localRotation = Quaternion.identity;
         
+        // Spawn star explosion effects
+        var starExplosionEffect = Instantiate(PolymorphSpellData.StarExplosionPrefab, victim.transform.position,
+            Quaternion.identity);
+        var effectDuration = starExplosionEffect.GetComponent<ParticleSystem>().main.duration;
+        Destroy(starExplosionEffect, effectDuration);
+        
         // Update client polymorph controller if need be
         if (victim.TryGetComponent<PolymorphController>(out _))
         {
@@ -176,6 +182,12 @@ internal class PolymorphSpellLogic : SpellLogic
             yield return new WaitForSeconds(soundLength);
             break;
         }
+        
+        // Spawn star explosion effects
+        var starExplosionEffect = Instantiate(PolymorphSpellData.StarExplosionPrefab, victim.transform.position,
+            Quaternion.identity);
+        var effectDuration = starExplosionEffect.GetComponent<ParticleSystem>().main.duration;
+        Destroy(starExplosionEffect, effectDuration);
         
         // Destroy polymorph
         Destroy(polymorph);

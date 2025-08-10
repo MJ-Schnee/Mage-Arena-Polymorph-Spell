@@ -20,6 +20,8 @@ internal class PolymorphSpellData : SpellData
 
     internal static GameObject ChickenPrefab;
 
+    internal static GameObject StarExplosionPrefab;
+
     internal static AudioClip PolymorphCastSound;
 
     internal static AudioClip PolymorphSubsideSound;
@@ -36,13 +38,20 @@ internal class PolymorphSpellData : SpellData
             return;
         }
 
-        foreach (var asset in polymorphAssets.GetAllAssetNames())
-        {
-            PolymorphSpell.Logger.LogInfo($"ASSET NAME: {asset}");
-        }
+        #if DEBUG
+            foreach (var asset in polymorphAssets.GetAllAssetNames())
+            {
+                PolymorphSpell.Logger.LogInfo($"ASSET NAME: {asset}");
+            }
+        #endif
 
         ChickenPrefab = polymorphAssets.LoadAsset<GameObject>("assets/polymorphspell/chicken.prefab");
         Object.DontDestroyOnLoad(ChickenPrefab);
+
+        StarExplosionPrefab =
+            polymorphAssets.LoadAsset<GameObject>(
+                "assets/hovl studio/magic effects pack/prefabs/hits and explosions/star hit.prefab");
+        Object.DontDestroyOnLoad(StarExplosionPrefab);
 
         PolymorphCastSound = Utils.LoadSound("Polymorph_Cast.wav", AudioType.WAV);
 
