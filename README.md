@@ -49,6 +49,8 @@ The following settings can be adjusted:
 * Duration increase per spell level
 
 ## Changelog
+* **0.3.1**: Fix polymorph ending immediately
+
 * **0.3.0**: Add controllable polymorph
 
 * **0.2.0**: Add casting/subsiding sounds and spell duration configuration

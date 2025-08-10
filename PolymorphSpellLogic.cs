@@ -168,13 +168,16 @@ internal class PolymorphSpellLogic : SpellLogic
         var victimPlayerMovement = victim.GetComponent<PlayerMovement>();
         
         var soundLength = PolymorphSpellData.PolymorphSubsideSound.length;
+
+        var endTime = spellStartTime + spellDurationSec - soundLength;
         
         // Wait until player is dead or polymorph timer has finished
         while (!victimPlayerMovement.isDead)
         {
-            if (Time.time < spellStartTime + spellDurationSec - soundLength)
+            if (Time.time < endTime)
             {
                 yield return null;
+                continue;
             }
             
             Utils.PlaySpatialSoundAtPosition(victim.transform.position, PolymorphSpellData.PolymorphSubsideSound);
