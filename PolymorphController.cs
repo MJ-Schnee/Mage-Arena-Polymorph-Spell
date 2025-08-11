@@ -1,4 +1,5 @@
 using System.Reflection;
+using Dissonance;
 using UnityEngine;
 
 namespace PolymorphSpell;
@@ -19,6 +20,8 @@ internal class PolymorphController: MonoBehaviour
     private Camera _clientPlayerCam;
 
     private Animator _clientArmsAni;
+
+    private DissonanceComms _clientComms;
     
     private void Awake()
     {
@@ -37,7 +40,18 @@ internal class PolymorphController: MonoBehaviour
         
         _clientArmsAni = ClientPlayerMovement.ArmsAni;
         if (_clientArmsAni is null)
+        {
             PolymorphSpell.Logger.LogError("Client PlayerMovement's ArmsAni is null!");
+            return;
+        }
+
+        _clientComms = FindFirstObjectByType<DissonanceComms>();
+        if (_clientComms is null)
+        {
+            PolymorphSpell.Logger.LogError("Client PlayerMovement's ArmsAni is null!");
+            return;
+        }
+        _clientComms.IsMuted = true;
     }
     
     private void Update()
@@ -72,5 +86,6 @@ internal class PolymorphController: MonoBehaviour
         ClientPlayerMovement.ResetCam();
         ClientPolymorphAnimator = null;
         ClientPlayerMovement.canRecall = true;
+        _clientComms.IsMuted = false;
     }
 }
