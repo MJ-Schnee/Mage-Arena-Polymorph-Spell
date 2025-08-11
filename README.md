@@ -28,9 +28,14 @@ rendering them unable to communicate or use spells until the effect wares off or
        └── plugins/
            └── PolymorphSpell/
 			   └── PolymorphSpell.dll
+			   └── AssetBundles/
+			       └── polymorph
 			   └── Sounds/
+			       └── Chicken.wav
+			       └── Polymorph_Cast.wav
 			       └── Polymorph_Drop.wav
 			       └── Polymorph_Equip.wav
+			       └── Polymorph_Subside.wav
 			   └── Sprites/
 			       └── Polymorph_Emission.png
 			       └── Polymorph_Main.png
