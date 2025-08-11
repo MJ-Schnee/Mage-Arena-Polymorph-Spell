@@ -17,6 +17,8 @@ internal static class PolymorphSpellConfig
 
     internal static ConfigEntry<bool> TeamChestConfig { get; private set; }
 
+    internal static ConfigEntry<float> PolymorphHealth { get; private set; }
+
     private static bool _mageConfigApiExists;
 
     private static BaseUnityPlugin _plugin;
@@ -62,6 +64,13 @@ internal static class PolymorphSpellConfig
             "Team Chest",
             true,
             "Whether the page can spawn in the team chest"
+        );
+
+        PolymorphHealth = BindConfig(
+            "PolymorphHealth",
+            20f,
+            "Health of polymorph (capped to player's health pre-polymorph)",
+            new AcceptableValueRange<float>(0f, float.MaxValue)
         );
     }
 

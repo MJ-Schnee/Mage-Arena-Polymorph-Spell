@@ -49,6 +49,8 @@ The following settings can be adjusted:
 * Duration increase per spell level
 
 ## Changelog
+* **0.6.0**: Polymorph has its own health and damage carries over to player
+
 * **0.5.0**: Mute player upon polymorph
 
 * **0.4.1**: Can't target already polymorphed players

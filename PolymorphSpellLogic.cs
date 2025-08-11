@@ -1,6 +1,7 @@
 ﻿using BlackMagicAPI.Modules.Spells;
 using System.Collections;
 using System.Linq;
+using System.Reflection;
 using FishNet.Object;
 using UnityEngine;
 
@@ -154,6 +155,19 @@ internal class PolymorphSpellLogic : SpellLogic
         var effectDuration = starExplosionEffect.GetComponent<ParticleSystem>().main.duration;
         Destroy(starExplosionEffect, effectDuration);
         
+        // Store player health and set polymorphed health
+        var playerHealthInfo = typeof(PlayerMovement).GetField("playerHealth", BindingFlags.NonPublic | BindingFlags.Instance);
+        if (playerHealthInfo is null)
+        {
+            PolymorphSpell.Logger.LogError("Victim's PlayerMovement does not have a playerHealth!");
+            return;
+        }
+        var prePolymorphHealth = (float)playerHealthInfo.GetValue(victimPlayerMovement);
+        playerHealthInfo.SetValue(victimPlayerMovement,
+            prePolymorphHealth > PolymorphSpellConfig.PolymorphHealth.Value
+                ? PolymorphSpellConfig.PolymorphHealth.Value
+                : prePolymorphHealth);
+
         // Update client polymorph controller if need be
         if (victim.TryGetComponent<PolymorphController>(out _))
         {
@@ -167,7 +181,12 @@ internal class PolymorphSpellLogic : SpellLogic
         }
 
         var spellStartTime = Time.time;
-        StartCoroutine(EndPolymorph(victim, spellStartTime, spellDurationSec, polymorph, playerSkins));
+        StartCoroutine(EndPolymorph(victim,
+            spellStartTime,
+            spellDurationSec,
+            polymorph,
+            playerSkins,
+            prePolymorphHealth));
     }
 
     /// <summary>
@@ -178,11 +197,13 @@ internal class PolymorphSpellLogic : SpellLogic
     /// <param name="spellDurationSec">Duration of polymorph</param>
     /// <param name="polymorph">Polymorph object</param>
     /// <param name="playerSkins">Disabled skins of victim</param>
+    /// <param name="prePolymorphHealth">Player's health pre-polymorph</param>
     private IEnumerator EndPolymorph(GameObject victim,
         float spellStartTime,
         float spellDurationSec,
         GameObject polymorph,
-        SkinnedMeshRenderer[] playerSkins)
+        SkinnedMeshRenderer[] playerSkins,
+        float prePolymorphHealth)
     {
         var victimPlayerMovement = victim.GetComponent<PlayerMovement>();
         
@@ -222,9 +243,11 @@ internal class PolymorphSpellLogic : SpellLogic
         }
         PolymorphSpellData.PolymorphedPlayers.Remove(victimNetObj.ObjectId);
 
-        // Re-enable player's skins (player could have died while waiting for sound to finish)
+        // Restore player's skins and health
+        // (player could have died while waiting for sound to finish)
         if (!victimPlayerMovement.isDead)
         {
+            // Skins
             var arms = victim.transform.Find("armz");
             var pickup = victim.transform.Find("pikupact");
             arms?.gameObject.SetActive(true);
@@ -232,10 +255,23 @@ internal class PolymorphSpellLogic : SpellLogic
             foreach (var meshRenderer in playerSkins)
             {
                 meshRenderer.enabled = true;
-            }   
+            }
+
+            // Health
+            var playerHealthInfo = typeof(PlayerMovement).GetField("playerHealth", BindingFlags.NonPublic | BindingFlags.Instance);
+            if (playerHealthInfo is null)
+            {
+                PolymorphSpell.Logger.LogError("Victim's PlayerMovement does not have a playerHealth!");
+                yield break;
+            }
+            var currHealth = (float)playerHealthInfo.GetValue(victimPlayerMovement);
+            var baseline = Mathf.Min(prePolymorphHealth, PolymorphSpellConfig.PolymorphHealth.Value);
+            var damageTaken = Mathf.Max(0f, baseline - currHealth);
+            var newHealth = Mathf.Clamp(prePolymorphHealth - damageTaken, 0f, prePolymorphHealth);
+            playerHealthInfo.SetValue(victimPlayerMovement, newHealth);
         }
         
-        // Return camera to default if client
+        // Restore client camera
         var clientWasPolymorphed =
             victimPlayerMovement.gameObject.TryGetComponent<PolymorphController>(out var polymorphCamController); 
         if (!clientWasPolymorphed)
