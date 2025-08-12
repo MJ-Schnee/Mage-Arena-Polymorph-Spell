@@ -243,15 +243,17 @@ internal class PolymorphSpellLogic : SpellLogic
         }
         PolymorphSpellData.PolymorphedPlayers.Remove(victimNetObj.ObjectId);
 
+        // Restore pickup action
+        var pickup = victim.transform.Find("pikupact");
+        pickup?.gameObject.SetActive(true);
+
         // Restore player's skins and health
         // (player could have died while waiting for sound to finish)
         if (!victimPlayerMovement.isDead)
         {
             // Skins
             var arms = victim.transform.Find("armz");
-            var pickup = victim.transform.Find("pikupact");
             arms?.gameObject.SetActive(true);
-            pickup?.gameObject.SetActive(true);
             foreach (var meshRenderer in playerSkins)
             {
                 meshRenderer.enabled = true;
