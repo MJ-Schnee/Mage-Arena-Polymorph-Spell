@@ -31,7 +31,7 @@ internal class PolymorphSpellData : SpellData
 
     internal const float MaxFindTargetAngle = 45f;
 
-    internal static readonly HashSet<int> PolymorphedPlayers = [];
+    internal static readonly HashSet<int> PolymorphedPlayerNetIds = [];
 
     internal static void LoadAssets()
     {

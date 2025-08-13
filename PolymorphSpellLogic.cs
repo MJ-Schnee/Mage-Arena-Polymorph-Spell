@@ -1,7 +1,5 @@
 ﻿using BlackMagicAPI.Modules.Spells;
 using System.Collections;
-using System.Linq;
-using System.Reflection;
 using FishNet.Object;
 using UnityEngine;
 
@@ -18,20 +16,16 @@ internal class PolymorphSpellLogic : SpellLogic
         var spellDurationSec = PolymorphSpellConfig.DefaultSpellDurationSecConfig.Value +
                                  castingLevel * PolymorphSpellConfig.CastingLevelDurationIncreaseSecConfig.Value;
 
-        var (victim, victimPlayerMovement, victimIsClient) = 
+        var victim =
             #if DEBUG && SHOULD_POLYMORPH_SELF
-                (caster, caster.GetComponent<PlayerMovement>(), true);
+                caster;
             #else
                 FindTarget(caster);
             #endif
 
-        if (victimIsClient)
-        {
-            PolymorphController.ClientPlayerMovement = victimPlayerMovement;
-            victimPlayerMovement.gameObject.AddComponent<PolymorphController>();
-        }
+        victim.AddComponent<PolymorphController>();
         
-        StartPolymorph(victim, spellDurationSec);
+        StartCoroutine(EndPolymorph(victim, spellDurationSec));
     }
 
     /// <summary>
@@ -39,27 +33,24 @@ internal class PolymorphSpellLogic : SpellLogic
     /// </summary>
     /// <param name="caster"></param>
     /// <returns></returns>
-    private static (GameObject victim, PlayerMovement victimPlayerMovement, bool victimIsClient)
-        FindTarget(GameObject caster)
+    private static GameObject FindTarget(GameObject caster)
     {
         var casterNetObj = caster.GetComponent<NetworkObject>();
         if (casterNetObj is null)
         {
             PolymorphSpell.Logger.LogError("Spell network object couldn't be found!");
-            return (null, null, false);
+            return null;
         }
         
         var casterNetId = casterNetObj.ObjectId;
         GameObject targetPlayer = null;
-        PlayerMovement targetPlayerMovement = null;
-        var targetPlayerIsClient = false;
         var targetPlayerNetId = 0;
         
         var casterMovementComp = caster.GetComponent<PlayerMovement>();
         if (casterMovementComp is null)
         {
             PolymorphSpell.Logger.LogError("Caster's PlayerMovement could not be found!");
-            return (null, null, false);
+            return null;
         }
         
         var casterPos = caster.transform.position;
@@ -75,7 +66,7 @@ internal class PolymorphSpellLogic : SpellLogic
                 continue;
             
             // Skip already polymorphed players
-            if (PolymorphSpellData.PolymorphedPlayers.Contains(targetNetObj.ObjectId))
+            if (PolymorphSpellData.PolymorphedPlayerNetIds.Contains(targetNetObj.ObjectId))
                 continue;
 
             var tempTargetMovement = target.GetComponent<PlayerMovement>();
@@ -100,187 +91,55 @@ internal class PolymorphSpellLogic : SpellLogic
                 
             bestScore = score;
             targetPlayer = tempTargetMovement.gameObject;
-            targetPlayerMovement = tempTargetMovement;
-            targetPlayerIsClient = targetNetObj.IsOwner;
             targetPlayerNetId = targetNetObj.ObjectId;
         }
         
-        PolymorphSpellData.PolymorphedPlayers.Add(targetPlayerNetId);
-
-        return (targetPlayer, targetPlayerMovement, targetPlayerIsClient);
-    }
-
-    /// <summary>
-    /// Begin polymorph effect on victim
-    /// </summary>
-    /// <param name="victim"></param>
-    /// <param name="spellDurationSec"></param>
-    private void StartPolymorph(GameObject victim, float spellDurationSec)
-    {
-        var victimPlayerMovement = victim.GetComponent<PlayerMovement>();
-        
-        Utils.PlaySpatialSoundAtPosition(victim.transform.position, PolymorphSpellData.PolymorphCastSound);
-        
-        // Disable player skins
-        var playerSkins = victimPlayerMovement.wizardBody.Where(renderer => renderer.enabled).ToArray();
-        foreach (var meshRenderer in playerSkins)
-        {
-            meshRenderer.enabled = false;
-        }
-        var arms = victim.transform.Find("armz");
-        arms?.gameObject.SetActive(false);
-        var pickup = victim.transform.Find("pikupact");
-        pickup?.gameObject.SetActive(false);
-        
-        // Spawn chicken and attach to victim
-        var polymorph = Instantiate(PolymorphSpellData.ChickenPrefab, victim.transform.position, Quaternion.identity);
-        polymorph.transform.SetParent(victim.transform, false);
-        polymorph.transform.localPosition = Vector3.zero;
-        polymorph.transform.localRotation = Quaternion.identity;
-        
-        // Spawn chicken sounds and attach to victim
-        var polymorphSoundLoop = polymorph.AddComponent<AudioSource>();
-        polymorphSoundLoop.clip = PolymorphSpellData.ChickenSounds;
-        polymorphSoundLoop.volume = 1f;
-        polymorphSoundLoop.spatialBlend = 1f;
-        polymorphSoundLoop.rolloffMode = AudioRolloffMode.Linear;
-        polymorphSoundLoop.minDistance = 5f;
-        polymorphSoundLoop.maxDistance = 350f;
-        polymorphSoundLoop.loop = true;
-        polymorphSoundLoop.Play();
-        
-        // Spawn star explosion effects
-        var starExplosionEffect = Instantiate(PolymorphSpellData.StarExplosionPrefab, victim.transform.position,
-            Quaternion.identity);
-        var effectDuration = starExplosionEffect.GetComponent<ParticleSystem>().main.duration;
-        Destroy(starExplosionEffect, effectDuration);
-        
-        // Store player health and set polymorphed health
-        var playerHealthInfo = typeof(PlayerMovement).GetField("playerHealth", BindingFlags.NonPublic | BindingFlags.Instance);
-        if (playerHealthInfo is null)
-        {
-            PolymorphSpell.Logger.LogError("Victim's PlayerMovement does not have a playerHealth!");
-            return;
-        }
-        var prePolymorphHealth = (float)playerHealthInfo.GetValue(victimPlayerMovement);
-        playerHealthInfo.SetValue(victimPlayerMovement,
-            prePolymorphHealth > PolymorphSpellConfig.PolymorphHealth.Value
-                ? PolymorphSpellConfig.PolymorphHealth.Value
-                : prePolymorphHealth);
-
-        // Update client polymorph controller if need be
-        if (victim.TryGetComponent<PolymorphController>(out _))
-        {
-            var polymorphAnimator = polymorph.GetComponent<Animator>();
-            if (polymorphAnimator is null)
-            {
-                PolymorphSpell.Logger.LogError("Polymorph animator not found!");
-                return;
-            }
-            PolymorphController.ClientPolymorphAnimator = polymorphAnimator;
-        }
-
-        var spellStartTime = Time.time;
-        StartCoroutine(EndPolymorph(victim,
-            spellStartTime,
-            spellDurationSec,
-            polymorph,
-            playerSkins,
-            prePolymorphHealth));
+        PolymorphSpellData.PolymorphedPlayerNetIds.Add(targetPlayerNetId);
+        return targetPlayer;
     }
 
     /// <summary>
     /// Waits for player to die or polymorph timer to finish and then removes polymorph effect
     /// </summary>
     /// <param name="victim">Victim affected by polymorph</param>
-    /// <param name="spellStartTime">Time when polymorph spell started</param>
     /// <param name="spellDurationSec">Duration of polymorph</param>
-    /// <param name="polymorph">Polymorph object</param>
-    /// <param name="playerSkins">Disabled skins of victim</param>
-    /// <param name="prePolymorphHealth">Player's health pre-polymorph</param>
-    private IEnumerator EndPolymorph(GameObject victim,
-        float spellStartTime,
-        float spellDurationSec,
-        GameObject polymorph,
-        SkinnedMeshRenderer[] playerSkins,
-        float prePolymorphHealth)
+    private static IEnumerator EndPolymorph(GameObject victim, float spellDurationSec)
     {
         var victimPlayerMovement = victim.GetComponent<PlayerMovement>();
-        
-        var soundLength = PolymorphSpellData.PolymorphSubsideSound.length;
+        var subsideSoundLength = PolymorphSpellData.PolymorphSubsideSound.length;
+        var spellStartTime = Time.time;
+        var spellEndTime = spellStartTime + spellDurationSec - subsideSoundLength;
 
-        var endTime = spellStartTime + spellDurationSec - soundLength;
-        
         // Wait until player is dead or polymorph timer has finished
         while (!victimPlayerMovement.isDead)
         {
-            if (Time.time < endTime)
+            if (Time.time < spellEndTime)
             {
                 yield return null;
                 continue;
             }
-            
+
             Utils.PlaySpatialSoundAtPosition(victim.transform.position, PolymorphSpellData.PolymorphSubsideSound);
 
-            yield return new WaitForSeconds(soundLength);
+            yield return new WaitForSeconds(subsideSoundLength);
+
+            // Player could have died while sound effect playing
+            if (!victimPlayerMovement.isDead)
+            {
+                // Spawn star explosion effects
+                var starExplosionEffect = Instantiate(PolymorphSpellData.StarExplosionPrefab, victim.transform.position,
+                    Quaternion.identity);
+                var effectDuration = starExplosionEffect.GetComponent<ParticleSystem>().main.duration;
+                Destroy(starExplosionEffect, effectDuration);
+            }
+
             break;
         }
-        
-        // Spawn star explosion effects
-        var starExplosionEffect = Instantiate(PolymorphSpellData.StarExplosionPrefab, victim.transform.position,
-            Quaternion.identity);
-        var effectDuration = starExplosionEffect.GetComponent<ParticleSystem>().main.duration;
-        Destroy(starExplosionEffect, effectDuration);
-        
+
         // Destroy polymorph
-        Destroy(polymorph);
-
-        var victimNetObj = victim.GetComponent<NetworkObject>();
-        if (victimNetObj is null)
-        {
-            PolymorphSpell.Logger.LogInfo("Victim Network Object is null!");
+        var polymorphComponent = victim.GetComponent<PolymorphController>();
+        if (polymorphComponent is null)
             yield break;
-        }
-        PolymorphSpellData.PolymorphedPlayers.Remove(victimNetObj.ObjectId);
-
-        // Restore pickup action
-        var pickup = victim.transform.Find("pikupact");
-        pickup?.gameObject.SetActive(true);
-
-        // Restore player's skins and health
-        // (player could have died while waiting for sound to finish)
-        if (!victimPlayerMovement.isDead)
-        {
-            // Skins
-            var arms = victim.transform.Find("armz");
-            arms?.gameObject.SetActive(true);
-            foreach (var meshRenderer in playerSkins)
-            {
-                meshRenderer.enabled = true;
-            }
-
-            // Health
-            var playerHealthInfo = typeof(PlayerMovement).GetField("playerHealth", BindingFlags.NonPublic | BindingFlags.Instance);
-            if (playerHealthInfo is null)
-            {
-                PolymorphSpell.Logger.LogError("Victim's PlayerMovement does not have a playerHealth!");
-                yield break;
-            }
-            var currHealth = (float)playerHealthInfo.GetValue(victimPlayerMovement);
-            var baseline = Mathf.Min(prePolymorphHealth, PolymorphSpellConfig.PolymorphHealth.Value);
-            var damageTaken = Mathf.Max(0f, baseline - currHealth);
-            var newHealth = Mathf.Clamp(prePolymorphHealth - damageTaken, 0f, prePolymorphHealth);
-            playerHealthInfo.SetValue(victimPlayerMovement, newHealth);
-        }
-        
-        // Restore client camera
-        var clientWasPolymorphed =
-            victimPlayerMovement.gameObject.TryGetComponent<PolymorphController>(out var polymorphCamController); 
-        if (!clientWasPolymorphed)
-        {
-            PolymorphSpell.Logger.LogInfo("Polymorphed Camera Controller not found. Assuming client isn't polymorphed");
-            yield break;
-        }
-        Destroy(polymorphCamController);
+        Destroy(polymorphComponent);
     }
 }

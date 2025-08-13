@@ -54,6 +54,8 @@ The following settings can be adjusted:
 * Duration increase per spell level
 
 ## Changelog
+* **0.7.0**: Polymorph animation is synced between all clients
+
 * **0.6.0**: Polymorph has its own health and damage carries over to player
 
 * **0.5.0**: Mute player upon polymorph
