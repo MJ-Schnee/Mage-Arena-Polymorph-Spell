@@ -65,7 +65,7 @@ internal class PolymorphController: MonoBehaviour
 
         // Ensure health doesn't go over polymorph max
         if ((float)_playerHealthField.GetValue(_playerMovement) > PolymorphSpellConfig.PolymorphHealth.Value)
-            _playerHealthField.SetValue(PolymorphSpellConfig.PolymorphHealth.Value, _playerMovement);
+            _playerHealthField.SetValue(_playerMovement, PolymorphSpellConfig.PolymorphHealth.Value);
 
         // The rest of update is only for the client
         if (!_isClient)
