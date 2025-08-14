@@ -27,6 +27,8 @@ internal class PolymorphController: MonoBehaviour
 
     private Animator _polymorphAnimator;
 
+    private FieldInfo _playerHealthField;
+
     private bool _isClient;
 
     private Camera _clientPlayerCam;
@@ -58,6 +60,10 @@ internal class PolymorphController: MonoBehaviour
             _playerMovement.currentSpeed > _playerMovement.walkingSpeed
                 ? _playerMovement.currentSpeed / _playerMovement.runningSpeed
                 : 0f);
+
+        // Ensure health doesn't go over polymorph max
+        if ((float)_playerHealthField.GetValue(_playerMovement) > PolymorphSpellConfig.PolymorphHealth.Value)
+            _playerHealthField.SetValue(PolymorphSpellConfig.PolymorphHealth.Value, _playerMovement);
 
         // The rest of update is only for the client
         if (!_isClient)
@@ -172,14 +178,14 @@ internal class PolymorphController: MonoBehaviour
         Destroy(starExplosionEffect, effectDuration);
 
         // Store player health and set polymorphed health
-        var playerHealthInfo = typeof(PlayerMovement).GetField("playerHealth", BindingFlags.NonPublic | BindingFlags.Instance);
-        if (playerHealthInfo is null)
+        _playerHealthField = typeof(PlayerMovement).GetField("playerHealth", BindingFlags.NonPublic | BindingFlags.Instance);
+        if (_playerHealthField is null)
         {
             PolymorphSpell.Logger.LogError("PlayerMovement does not have a playerHealth!");
             return;
         }
-        _prePolymorphHealth = (float)playerHealthInfo.GetValue(_playerMovement);
-        playerHealthInfo.SetValue(_playerMovement,
+        _prePolymorphHealth = (float)_playerHealthField.GetValue(_playerMovement);
+        _playerHealthField.SetValue(_playerMovement,
             _prePolymorphHealth > PolymorphSpellConfig.PolymorphHealth.Value
                 ? PolymorphSpellConfig.PolymorphHealth.Value
                 : _prePolymorphHealth);
