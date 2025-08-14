@@ -18,6 +18,8 @@ internal class PolymorphController: MonoBehaviour
     private GameObject _player;
 
     private PlayerMovement _playerMovement;
+    
+    private PlayerInventory _playerInventory;
 
     private NetworkObject _playerNetObj;
 
@@ -125,10 +127,13 @@ internal class PolymorphController: MonoBehaviour
         if (_isClient)
         {
             _playerMovement.ResetCam();
+            
+            _playerInventory.canSwapItem = true;
         }
         _polymorphAnimator = null;
         _playerMovement.canRecall = true;
         _playerMovement = null;
+        _playerInventory = null;
         _clientComms.IsMuted = false;
     }
 
@@ -197,6 +202,15 @@ internal class PolymorphController: MonoBehaviour
     private void AwakeForLocal()
     {
         _isClient = true;
+        
+        _playerInventory = GetComponent<PlayerInventory>();
+        if (_playerInventory is null)
+        {
+            PolymorphSpell.Logger.LogError("PlayerInventory is null!");
+            return;
+        }
+
+        _playerInventory.canSwapItem = false;
 
         _polymorphAnimator = _polymorphGameObject.GetComponent<Animator>();
         if (_polymorphAnimator is null)
