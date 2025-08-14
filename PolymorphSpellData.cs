@@ -56,6 +56,14 @@ internal class PolymorphSpellData : SpellData
         Object.DontDestroyOnLoad(penguinPrefab);
         PolymorphPrefabs.Add(penguinPrefab);
 
+        var sheepPrefab = polymorphAssets.LoadAsset<GameObject>("assets/polymorphspell/sheep.prefab");
+        Object.DontDestroyOnLoad(sheepPrefab);
+        PolymorphPrefabs.Add(sheepPrefab);
+
+        var cowPrefab = polymorphAssets.LoadAsset<GameObject>("assets/polymorphspell/cow.prefab");
+        Object.DontDestroyOnLoad(cowPrefab);
+        PolymorphPrefabs.Add(cowPrefab);
+
         StarExplosionPrefab =
             polymorphAssets.LoadAsset<GameObject>(
                 "assets/hovl studio/magic effects pack/prefabs/hits and explosions/star hit.prefab");

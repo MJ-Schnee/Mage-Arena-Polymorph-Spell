@@ -31,8 +31,6 @@ rendering them unable to communicate or use spells until the effect wares off, o
 			   └── AssetBundles/
 			       └── polymorph
 			   └── Sounds/
-			       └── Chicken.wav
-			       └── Penguin.wav
 			       └── Polymorph_Cast.wav
 			       └── Polymorph_Drop.wav
 			       └── Polymorph_Equip.wav
@@ -55,7 +53,9 @@ The following settings can be adjusted:
 * Duration increase per spell level
 
 ## Changelog
-* **0.9.0**: Add penguin as alternate polymorph
+* **0.11.0**: Add cow and sheep as alternate polymorph
+
+* **0.10.0**: Add penguin as alternate polymorph
 
 * **0.8.0**: Fix polymorph victim's item still being visible in the air and the victim's item not being visible client-side upon un-polymorphing
 
@@ -80,7 +80,11 @@ The following settings can be adjusted:
 ## Credits
 * **Polymorph Icon**: "Baldurs Gate 3" by Larian Studios - https://bg3.wiki/wiki/Polymorph
 * **Casting sound**: "Magic spell (small positive)" by Nakhas - https://freesound.org/people/Nakhas/sounds/506939/
-* **Polymorph models**: "Animals FREE - Animated Low Poly 3D Models" by ithappy - https://assetstore.unity.com/packages/3d/characters/animals/animals-free-animated-low-poly-3d-models-260727
+* **Chicken, Penguin models**: "Animals FREE - Animated Low Poly 3D Models" by ithappy - https://assetstore.unity.com/packages/3d/characters/animals/animals-free-animated-low-poly-3d-models-260727
 * **Star explosion effect**: "Magic Effects FREE" by Hovl Studio - https://assetstore.unity.com/packages/vfx/particles/spells/magic-effects-free-247933
-* **Chicken clucking**: "chicken clucking type 3" by RibhavAgrawal - https://pixabay.com/sound-effects/chicken-cluking-type-3-293320/
+* **Chicken sounds**: "chicken clucking type 3" by RibhavAgrawal - https://pixabay.com/sound-effects/chicken-cluking-type-3-293320/
 * **Penguin sounds**: "Gunter" by Adventure Time - https://en.wikipedia.org/wiki/Adventure_Time
+* **Sheep model**: "Animated Goat and Sheep- 3D low poly-FREE" by UrsaAnimations - https://assetstore.unity.com/packages/3d/characters/animals/animated-goat-and-sheep-3d-low-poly-free-251910
+* **Sheep sounds**: "sheep baaing type 01" by RibhavAgrawal - https://pixabay.com/sound-effects/sheep-baaing-type-01-293306/
+* **Cow model**: "LowPoly Animated Animals" by Quaternius - https://quaternius.itch.io/lowpoly-animated-animals
+* **Cow sounds**: "cow mooing type 02" by RibhavAgrawal - https://pixabay.com/sound-effects/cow-mooing-type-02-293304/
