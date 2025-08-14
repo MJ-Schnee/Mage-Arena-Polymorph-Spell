@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Linq;
 using System.Reflection;
 using Dissonance;
@@ -14,8 +15,6 @@ internal class PolymorphController: MonoBehaviour
     private static readonly int PolymorphAnimatorWalkingId = Animator.StringToHash("Vert");
 
     private static readonly int PolymorphAnimatorRunningId = Animator.StringToHash("State");
-
-    private GameObject _player;
 
     private PlayerMovement _playerMovement;
     
@@ -94,20 +93,46 @@ internal class PolymorphController: MonoBehaviour
         
         Destroy(_polymorphGameObject);
 
-        // Restore pickup action
-        var pickup = _player.transform.Find("pikupact");
-        pickup?.gameObject.SetActive(true);
-
         // Restore player's skins and health
         // (player could have died while waiting for sound to finish)
         if (!_playerMovement.isDead)
         {
             // Skins
-            var arms = _player.transform.Find("armz");
-            arms?.gameObject.SetActive(true);
             foreach (var meshRenderer in _playerSkins)
             {
                 meshRenderer.enabled = true;
+            }
+            _playerMovement.armrender.enabled = true;
+            _playerMovement.PlayerArms.SetActive(true);
+
+            // Show player's equipped item
+            var equippedItemsFieldInfo = typeof(PlayerInventory).GetField("equippedItems", BindingFlags.NonPublic | BindingFlags.Instance);
+            if (equippedItemsFieldInfo is null)
+            {
+                PolymorphSpell.Logger.LogError("PlayerInventory does not have a equippedItems!");
+                return;
+            }
+            var equippedItems = (GameObject[])equippedItemsFieldInfo.GetValue(_playerInventory);
+            var equippedItem = equippedItems[_playerInventory.equippedIndex];
+            if (equippedItem is not null)
+            {
+                var layerMaskSwapOneMethodInfo = typeof(PlayerInventory).GetMethod("LayerMaskSwapOne", BindingFlags.NonPublic | BindingFlags.Instance);
+                if (layerMaskSwapOneMethodInfo is null)
+                {
+                    PolymorphSpell.Logger.LogError("PlayerInventory does not have a LayerMaskSwapOne!");
+                    return;
+                }
+                _playerInventory.StartCoroutine((IEnumerator)layerMaskSwapOneMethodInfo.Invoke(_playerInventory, []));
+
+                equippedItem.GetComponent<IItemInteraction>().ItemInit();
+
+                var setObjectInHandServerMethodInfo = typeof(PlayerInventory).GetMethod("SetObjectInHandServer", BindingFlags.NonPublic | BindingFlags.Instance);
+                if (setObjectInHandServerMethodInfo is null)
+                {
+                    PolymorphSpell.Logger.LogError("PlayerInventory does not have a SetObjectInHandServer!");
+                    return;
+                }
+                setObjectInHandServerMethodInfo.Invoke(_playerInventory, [equippedItem]);
             }
 
             // Health
@@ -142,8 +167,8 @@ internal class PolymorphController: MonoBehaviour
     /// </summary>
     private void AwakeForAll()
     {
-        _player = transform.gameObject;
         _playerMovement = GetComponent<PlayerMovement>();
+        _playerInventory = GetComponent<PlayerInventory>();
         _playerNetObj = GetComponent<NetworkObject>();
         PolymorphSpellData.PolymorphedPlayerNetIds.Add(_playerNetObj.ObjectId);
 
@@ -155,10 +180,38 @@ internal class PolymorphController: MonoBehaviour
         {
             meshRenderer.enabled = false;
         }
-        var arms = _playerMovement.transform.Find("armz");
-        arms?.gameObject.SetActive(false);
-        var pickup = _playerMovement.transform.Find("pikupact");
-        pickup?.gameObject.SetActive(false);
+        _playerMovement.armrender.enabled = false;
+        _playerMovement.PlayerArms.SetActive(false);
+
+        // Hide player's equipped item
+        var equippedItemsFieldInfo = typeof(PlayerInventory).GetField("equippedItems", BindingFlags.NonPublic | BindingFlags.Instance);
+        if (equippedItemsFieldInfo is null)
+        {
+            PolymorphSpell.Logger.LogError("PlayerInventory does not have a equippedItems!");
+            return;
+        }
+        var equippedItems = (GameObject[])equippedItemsFieldInfo.GetValue(_playerInventory);
+        var equippedItem = equippedItems[_playerInventory.equippedIndex];
+        if (equippedItem is not null)
+        {
+            var layerMaskSwapZeroMethodInfo = typeof(PlayerInventory).GetMethod("LayerMaskSwapZero", BindingFlags.NonPublic | BindingFlags.Instance);
+            if (layerMaskSwapZeroMethodInfo is null)
+            {
+                PolymorphSpell.Logger.LogError("PlayerInventory does not have a LayerMaskSwapZero!");
+                return;
+            }
+            _playerInventory.StartCoroutine((IEnumerator)layerMaskSwapZeroMethodInfo.Invoke(_playerInventory, []));
+
+            equippedItem.GetComponent<IItemInteraction>().HideItem();
+
+            var hideObjectMethodInfo = typeof(PlayerInventory).GetMethod("HideObject", BindingFlags.NonPublic | BindingFlags.Instance);
+            if (hideObjectMethodInfo is null)
+            {
+                PolymorphSpell.Logger.LogError("PlayerInventory does not have a HideObject!");
+                return;
+            }
+            hideObjectMethodInfo.Invoke(_playerInventory, [equippedItem]);
+        }
 
         // Spawn chicken and attach to victim
         _polymorphGameObject = Instantiate(PolymorphSpellData.ChickenPrefab, _playerMovement.transform.position, Quaternion.identity);
@@ -202,13 +255,6 @@ internal class PolymorphController: MonoBehaviour
     private void AwakeForLocal()
     {
         _isClient = true;
-        
-        _playerInventory = GetComponent<PlayerInventory>();
-        if (_playerInventory is null)
-        {
-            PolymorphSpell.Logger.LogError("PlayerInventory is null!");
-            return;
-        }
 
         _playerInventory.canSwapItem = false;
 

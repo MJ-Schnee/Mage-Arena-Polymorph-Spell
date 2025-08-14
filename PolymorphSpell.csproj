@@ -4,7 +4,7 @@
     <TargetFramework>net48</TargetFramework>
     <AssemblyName>PolymorphSpell</AssemblyName>
     <Product>Turn other mages into animals!</Product>
-    <Version>0.7.0</Version>
+    <Version>0.8.0</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>latest</LangVersion>
     <RestoreAdditionalProjectSources>
