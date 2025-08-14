@@ -1,5 +1,6 @@
 ﻿using BlackMagicAPI.Modules.Spells;
 using System.Collections;
+using BlackMagicAPI.Network;
 using FishNet.Object;
 using UnityEngine;
 
@@ -7,6 +8,36 @@ namespace PolymorphSpell;
 
 internal class PolymorphSpellLogic : SpellLogic
 {
+    /// <summary>
+    /// Client generates random number for which polymorph will activate
+    /// </summary>
+    public override void WriteData(DataWriter dataWriter,
+        PageController page,
+        GameObject caster,
+        Vector3 spawnPos,
+        Vector3 viewDirectionVector,
+        int spellLevel)
+    {
+        var rand = Random.Range(0, PolymorphSpellData.PolymorphPrefabs.Count);
+
+        dataWriter.Write(rand);
+    }
+
+    /// <summary>
+    /// Sets the polymorph prefab to be used
+    /// </summary>
+    /// <param name="values">Should be int[]: [PolymorphPrefabs Index]</param>
+    public override void SyncData(object[] values)
+    {
+        if (values.Length != 1 || values[0].GetType() != typeof(int))
+        {
+            PolymorphSpell.Logger.LogError("SyncData values does not contain 1 int entry!");
+            return;
+        }
+
+        PolymorphController.CurrentPolymorphIndex = (int)values[0];
+    }
+
     public override void CastSpell(GameObject caster,
         PageController page,
         Vector3 spawnPos,

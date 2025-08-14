@@ -12,6 +12,8 @@ namespace PolymorphSpell;
 /// </summary>
 internal class PolymorphController: MonoBehaviour
 {
+    public static int CurrentPolymorphIndex; 
+
     private static readonly int PolymorphAnimatorWalkingId = Animator.StringToHash("Vert");
 
     private static readonly int PolymorphAnimatorRunningId = Animator.StringToHash("State");
@@ -37,8 +39,6 @@ internal class PolymorphController: MonoBehaviour
     private Animator _clientArmsAni;
 
     private DissonanceComms _clientComms;
-
-    private AudioSource _polymorphSoundLoop;
 
     private float _prePolymorphHealth;
 
@@ -74,7 +74,8 @@ internal class PolymorphController: MonoBehaviour
         _playerMovement.canRecall = false;
         
         // Disable crouch
-        var playerIsCrouch = typeof(PlayerMovement).GetField("isCrouch", BindingFlags.NonPublic | BindingFlags.Instance);
+        var playerIsCrouch =
+            typeof(PlayerMovement).GetField("isCrouch", BindingFlags.NonPublic | BindingFlags.Instance);
         if (playerIsCrouch is null)
         {
             PolymorphSpell.Logger.LogError("PlayerMovement does not have a isCrouch");
@@ -106,7 +107,8 @@ internal class PolymorphController: MonoBehaviour
             _playerMovement.PlayerArms.SetActive(true);
 
             // Show player's equipped item
-            var equippedItemsFieldInfo = typeof(PlayerInventory).GetField("equippedItems", BindingFlags.NonPublic | BindingFlags.Instance);
+            var equippedItemsFieldInfo =
+                typeof(PlayerInventory).GetField("equippedItems", BindingFlags.NonPublic | BindingFlags.Instance);
             if (equippedItemsFieldInfo is null)
             {
                 PolymorphSpell.Logger.LogError("PlayerInventory does not have a equippedItems!");
@@ -116,7 +118,8 @@ internal class PolymorphController: MonoBehaviour
             var equippedItem = equippedItems[_playerInventory.equippedIndex];
             if (equippedItem is not null)
             {
-                var layerMaskSwapOneMethodInfo = typeof(PlayerInventory).GetMethod("LayerMaskSwapOne", BindingFlags.NonPublic | BindingFlags.Instance);
+                var layerMaskSwapOneMethodInfo = typeof(PlayerInventory).GetMethod("LayerMaskSwapOne",
+                    BindingFlags.NonPublic | BindingFlags.Instance);
                 if (layerMaskSwapOneMethodInfo is null)
                 {
                     PolymorphSpell.Logger.LogError("PlayerInventory does not have a LayerMaskSwapOne!");
@@ -126,7 +129,8 @@ internal class PolymorphController: MonoBehaviour
 
                 equippedItem.GetComponent<IItemInteraction>().ItemInit();
 
-                var setObjectInHandServerMethodInfo = typeof(PlayerInventory).GetMethod("SetObjectInHandServer", BindingFlags.NonPublic | BindingFlags.Instance);
+                var setObjectInHandServerMethodInfo = typeof(PlayerInventory).GetMethod("SetObjectInHandServer",
+                    BindingFlags.NonPublic | BindingFlags.Instance);
                 if (setObjectInHandServerMethodInfo is null)
                 {
                     PolymorphSpell.Logger.LogError("PlayerInventory does not have a SetObjectInHandServer!");
@@ -136,7 +140,8 @@ internal class PolymorphController: MonoBehaviour
             }
 
             // Health
-            var playerHealthInfo = typeof(PlayerMovement).GetField("playerHealth", BindingFlags.NonPublic | BindingFlags.Instance);
+            var playerHealthInfo =
+                typeof(PlayerMovement).GetField("playerHealth", BindingFlags.NonPublic | BindingFlags.Instance);
             if (playerHealthInfo is null)
             {
                 PolymorphSpell.Logger.LogError("Victim's PlayerMovement does not have a playerHealth!");
@@ -184,7 +189,8 @@ internal class PolymorphController: MonoBehaviour
         _playerMovement.PlayerArms.SetActive(false);
 
         // Hide player's equipped item
-        var equippedItemsFieldInfo = typeof(PlayerInventory).GetField("equippedItems", BindingFlags.NonPublic | BindingFlags.Instance);
+        var equippedItemsFieldInfo =
+            typeof(PlayerInventory).GetField("equippedItems", BindingFlags.NonPublic | BindingFlags.Instance);
         if (equippedItemsFieldInfo is null)
         {
             PolymorphSpell.Logger.LogError("PlayerInventory does not have a equippedItems!");
@@ -194,7 +200,8 @@ internal class PolymorphController: MonoBehaviour
         var equippedItem = equippedItems[_playerInventory.equippedIndex];
         if (equippedItem is not null)
         {
-            var layerMaskSwapZeroMethodInfo = typeof(PlayerInventory).GetMethod("LayerMaskSwapZero", BindingFlags.NonPublic | BindingFlags.Instance);
+            var layerMaskSwapZeroMethodInfo = typeof(PlayerInventory).GetMethod("LayerMaskSwapZero",
+                BindingFlags.NonPublic | BindingFlags.Instance);
             if (layerMaskSwapZeroMethodInfo is null)
             {
                 PolymorphSpell.Logger.LogError("PlayerInventory does not have a LayerMaskSwapZero!");
@@ -204,7 +211,8 @@ internal class PolymorphController: MonoBehaviour
 
             equippedItem.GetComponent<IItemInteraction>().HideItem();
 
-            var hideObjectMethodInfo = typeof(PlayerInventory).GetMethod("HideObject", BindingFlags.NonPublic | BindingFlags.Instance);
+            var hideObjectMethodInfo =
+                typeof(PlayerInventory).GetMethod("HideObject", BindingFlags.NonPublic | BindingFlags.Instance);
             if (hideObjectMethodInfo is null)
             {
                 PolymorphSpell.Logger.LogError("PlayerInventory does not have a HideObject!");
@@ -213,30 +221,22 @@ internal class PolymorphController: MonoBehaviour
             hideObjectMethodInfo.Invoke(_playerInventory, [equippedItem]);
         }
 
-        // Spawn chicken and attach to victim
-        _polymorphGameObject = Instantiate(PolymorphSpellData.ChickenPrefab, _playerMovement.transform.position, Quaternion.identity);
+        // Spawn polymorph prefab and attach to victim
+        _polymorphGameObject = Instantiate(PolymorphSpellData.PolymorphPrefabs[CurrentPolymorphIndex],
+            _playerMovement.transform.position, Quaternion.identity);
         _polymorphGameObject.transform.SetParent(_playerMovement.transform, false);
         _polymorphGameObject.transform.localPosition = Vector3.zero;
         _polymorphGameObject.transform.localRotation = Quaternion.identity;
 
-        // Spawn chicken sounds and attach to victim
-        _polymorphSoundLoop = _polymorphGameObject.AddComponent<AudioSource>();
-        _polymorphSoundLoop.clip = PolymorphSpellData.ChickenSounds;
-        _polymorphSoundLoop.volume = 1f;
-        _polymorphSoundLoop.spatialBlend = 1f;
-        _polymorphSoundLoop.rolloffMode = AudioRolloffMode.Linear;
-        _polymorphSoundLoop.minDistance = 5f;
-        _polymorphSoundLoop.maxDistance = 350f;
-        _polymorphSoundLoop.loop = true;
-        _polymorphSoundLoop.Play();
-
         // Spawn star explosion effects
-        var starExplosionEffect = Instantiate(PolymorphSpellData.StarExplosionPrefab, _playerMovement.transform.position, Quaternion.identity);
+        var starExplosionEffect = Instantiate(PolymorphSpellData.StarExplosionPrefab,
+            _playerMovement.transform.position, Quaternion.identity);
         var effectDuration = starExplosionEffect.GetComponent<ParticleSystem>().main.duration;
         Destroy(starExplosionEffect, effectDuration);
 
         // Store player health and set polymorphed health
-        _playerHealthField = typeof(PlayerMovement).GetField("playerHealth", BindingFlags.NonPublic | BindingFlags.Instance);
+        _playerHealthField =
+            typeof(PlayerMovement).GetField("playerHealth", BindingFlags.NonPublic | BindingFlags.Instance);
         if (_playerHealthField is null)
         {
             PolymorphSpell.Logger.LogError("PlayerMovement does not have a playerHealth!");
@@ -265,7 +265,8 @@ internal class PolymorphController: MonoBehaviour
             return;
         }
 
-        var playerCamInfo = typeof(PlayerMovement).GetField("playerCamera", BindingFlags.NonPublic | BindingFlags.Instance);
+        var playerCamInfo =
+            typeof(PlayerMovement).GetField("playerCamera", BindingFlags.NonPublic | BindingFlags.Instance);
         if (playerCamInfo is null)
         {
             PolymorphSpell.Logger.LogError("PlayerMovement does not have a playerCamera");

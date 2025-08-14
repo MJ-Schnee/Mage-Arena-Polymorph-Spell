@@ -1,8 +1,8 @@
 ﻿# Polymorph Spell
 *Erm, technically this spell requires a caterpillar cocoon* ☝️🤓
 
-A spell spell which turns other mages into animals,
-rendering them unable to communicate or use spells until the effect wares off or they die.
+A spell which turns other mages into animals,
+rendering them unable to communicate or use spells until the effect wares off, or they die.
 
 ## Spell Information
 * **Name**: "Polymorph"
@@ -32,6 +32,7 @@ rendering them unable to communicate or use spells until the effect wares off or
 			       └── polymorph
 			   └── Sounds/
 			       └── Chicken.wav
+			       └── Penguin.wav
 			       └── Polymorph_Cast.wav
 			       └── Polymorph_Drop.wav
 			       └── Polymorph_Equip.wav
@@ -54,6 +55,8 @@ The following settings can be adjusted:
 * Duration increase per spell level
 
 ## Changelog
+* **0.9.0**: Add penguin as alternate polymorph
+
 * **0.8.0**: Fix polymorph victim's item still being visible in the air and the victim's item not being visible client-side upon un-polymorphing
 
 * **0.7.0**: Polymorph animation is synced between all clients
@@ -80,3 +83,4 @@ The following settings can be adjusted:
 * **Polymorph models**: "Animals FREE - Animated Low Poly 3D Models" by ithappy - https://assetstore.unity.com/packages/3d/characters/animals/animals-free-animated-low-poly-3d-models-260727
 * **Star explosion effect**: "Magic Effects FREE" by Hovl Studio - https://assetstore.unity.com/packages/vfx/particles/spells/magic-effects-free-247933
 * **Chicken clucking**: "chicken clucking type 3" by RibhavAgrawal - https://pixabay.com/sound-effects/chicken-cluking-type-3-293320/
+* **Penguin sounds**: "Gunter" by Adventure Time - https://en.wikipedia.org/wiki/Adventure_Time

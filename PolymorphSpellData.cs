@@ -19,9 +19,7 @@ internal class PolymorphSpellData : SpellData
         public override bool DebugForceSpawn => true;
     #endif
 
-    internal static GameObject ChickenPrefab;
-
-    internal static AudioClip ChickenSounds;
+    internal static readonly List<GameObject> PolymorphPrefabs = [];
 
     internal static GameObject StarExplosionPrefab;
 
@@ -50,10 +48,13 @@ internal class PolymorphSpellData : SpellData
             }
         #endif
 
-        ChickenPrefab = polymorphAssets.LoadAsset<GameObject>("assets/polymorphspell/chicken.prefab");
-        Object.DontDestroyOnLoad(ChickenPrefab);
+        var chickenPrefab = polymorphAssets.LoadAsset<GameObject>("assets/polymorphspell/chicken.prefab");
+        Object.DontDestroyOnLoad(chickenPrefab);
+        PolymorphPrefabs.Add(chickenPrefab);
 
-        ChickenSounds = Utils.LoadSound("Chicken.wav", AudioType.WAV);
+        var penguinPrefab = polymorphAssets.LoadAsset<GameObject>("assets/polymorphspell/penguin.prefab");
+        Object.DontDestroyOnLoad(penguinPrefab);
+        PolymorphPrefabs.Add(penguinPrefab);
 
         StarExplosionPrefab =
             polymorphAssets.LoadAsset<GameObject>(
